@@ -12,6 +12,18 @@ import UIKit
     optional func filtersViewController(filtersViewController: FiltersViewController, didUpdateFilters filters: [String:AnyObject])
 }
 
+//enum sortRowIdentifier : String {
+//    case bestMatch = "Best Match"
+//    case distance = "Distance"
+//    case highestRated = "Highest Rated"
+//}
+//
+//class sortPreferences {
+//    var bestMatch = true, distance = false, highestRated = false
+//}
+
+
+
 class FiltersViewController: UIViewController , UITableViewDelegate, UITableViewDataSource, SwitchCellDelegate {
 
     @IBOutlet weak var tableView: UITableView!
@@ -28,13 +40,30 @@ class FiltersViewController: UIViewController , UITableViewDelegate, UITableView
 
     
     
-//    let data = [
-//        ("Distance", ["dd","ee"]),
-//        ("Sort", "ee,qq")]
-    
     var data = [[[String:String]]]()
     let dataHeaders = ["Deals", "Distance", "Sort By", "Category"]
 
+//    var currentSortPrefs: sortPreferences!
+//    let tableStructure: [sortRowIdentifier] = [.bestMatch, .distance, .highestRated]
+//    var prefValues: [sortRowIdentifier: Bool] = [:]
+//    
+//    // should be set by the class that instantiates this view controller
+//    var currentPrefs: sortPreferences! {
+//        didSet {
+//            prefValues[.bestMatch] = currentSortPrefs.bestMatch
+//            prefValues[.distance] = currentSortPrefs.distance
+//            prefValues[.highestRated] = currentSortPrefs.highestRated
+//            tableView?.reloadData()
+//        }
+//    }
+//    
+//    func preferencesFromTableData() -> sortPreferences {
+//        let ret = sortPreferences()
+//        ret.bestMatch = prefValues[.bestMatch] ?? ret.bestMatch
+//        ret.distance = prefValues[.distance] ?? ret.distance
+//        ret.highestRated = prefValues[.highestRated] ?? ret.highestRated
+//        return ret
+//    }
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -49,7 +78,7 @@ class FiltersViewController: UIViewController , UITableViewDelegate, UITableView
         //Setup sections
 
         data = [deals!, sortOptions!, distance!,categories!]
-        
+//        currentSortPrefs = currentSortPrefs ?? sortPreferences()
         
         
         //initialize tableview
@@ -84,19 +113,17 @@ class FiltersViewController: UIViewController , UITableViewDelegate, UITableView
         var selectedCategories = [String]()
 
         
-        for (row,isSelected) in dealsSwitchStates {
+        for (row,isSelected) in categorySwitchStates {
             if isSelected {
+                print("Sort Row: \(categories[row]["code"]!)")
                 selectedCategories.append(categories[row]["code"]!)
             }
         }
         
-        if selectedCategories.count > 0 {
-            filters["categories"] = selectedCategories
-        }
+    
         
         //set Deals Filter
         var selectedDeals = [String]()
-        
         
         for (row,isSelected) in dealsSwitchStates {
             if isSelected {
@@ -104,10 +131,7 @@ class FiltersViewController: UIViewController , UITableViewDelegate, UITableView
             }
         }
         
-        if selectedCategories.count > 0 {
-            filters["deals"] = selectedDeals
-        }
-
+        
         //set Distance Filter
         var selectedDistance = [String]()
         
@@ -118,22 +142,26 @@ class FiltersViewController: UIViewController , UITableViewDelegate, UITableView
             }
         }
         
-        if selectedDistance.count > 0 {
-            filters["distance"] = selectedDistance
-        }
-        
         //set Sort Filter
         var selectedSort = [String]()
         
         
         for (row,isSelected) in sortSwitchStates {
             if isSelected {
+                print("Sort Row: \(sortOptions[row]["code"]!)")
                 selectedSort.append(sortOptions[row]["code"]!)
             }
         }
+        print("Selected Sort: \(selectedSort)")
         
-        if selectedSort.count > 0 {
+        if selectedCategories.count > 0 {
+            filters["categories"] = selectedCategories
+        } else if selectedSort.count > 0 {
             filters["sort"] = selectedSort
+        } else if selectedDeals.count > 0 {
+            filters["deals"] = selectedDeals
+        } else if selectedDistance.count > 0 {
+            filters["distance"] = selectedDistance
         }
 
         
