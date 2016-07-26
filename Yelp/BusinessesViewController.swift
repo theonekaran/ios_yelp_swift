@@ -8,11 +8,12 @@
 
 import UIKit
 
-class BusinessesViewController: UIViewController , UITableViewDataSource, UITableViewDelegate, FiltersViewControllerDelegate {
+class BusinessesViewController: UIViewController , UITableViewDataSource, UITableViewDelegate, FiltersViewControllerDelegate, UISearchBarDelegate {
 
     var businesses: [Business]!
     
     @IBOutlet weak var tableView: UITableView!
+    var searchTerm = "Thai"
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -23,8 +24,14 @@ class BusinessesViewController: UIViewController , UITableViewDataSource, UITabl
         tableView.estimatedRowHeight = 100
         tableView.rowHeight = UITableViewAutomaticDimension
         
+        //add Searchbar
+        let searchBar = UISearchBar()
+        searchBar.delegate = self
+        searchBar.sizeToFit()
+        searchBar.showsCancelButton = false
+        self.navigationItem.titleView = searchBar
 
-        Business.searchWithTerm("Thai", completion: { (businesses: [Business]!, error: NSError!) -> Void in
+        Business.searchWithTerm(searchTerm, completion: { (businesses: [Business]!, error: NSError!) -> Void in
             self.businesses = businesses
             
             //reload tableview once data is available
@@ -48,6 +55,39 @@ class BusinessesViewController: UIViewController , UITableViewDataSource, UITabl
 */
     }
     
+    
+    //Search methods
+    func searchBarTextDidBeginEditing(searchBar: UISearchBar) {
+        searchBar.becomeFirstResponder()
+        searchBar.showsCancelButton = true
+    }
+    
+    func searchBarCancelButtonClicked(searchBar: UISearchBar) {
+        searchBar.showsCancelButton = false
+        searchBar.text = ""
+        searchBar.resignFirstResponder()
+    }
+    
+    func searchBarSearchButtonClicked(searchBar: UISearchBar) {
+        searchTerm = searchBar.text!
+        Business.searchWithTerm(searchTerm, completion: { (businesses: [Business]!, error: NSError!) -> Void in
+            self.businesses = businesses
+            
+            //reload tableview once data is available
+            self.tableView.reloadData()
+            
+            //            for business in businesses {
+            //                print(business.name!)
+            //                print(business.address!)
+            //            }
+        })
+        searchBar.showsCancelButton = false
+        searchBar.text = ""
+        searchBar.resignFirstResponder()
+
+    }
+    
+    //Table methods
     func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         if businesses != nil {
             return businesses.count
@@ -72,6 +112,7 @@ class BusinessesViewController: UIViewController , UITableViewDataSource, UITabl
     }
 
     
+    
     // MARK: - Navigation
 
     // In a storyboard-based application, you will often want to do a little preparation before navigation
@@ -85,11 +126,10 @@ class BusinessesViewController: UIViewController , UITableViewDataSource, UITabl
     
     func filtersViewController(filtersViewController: FiltersViewController, didUpdateFilters filters: [String : AnyObject]) {
         let categories = filters["categories"] as? [String]
-//        print("Sort FIlter: \(filters["sort"]!)")
-        let sort = filters["sort"]![0] as! String
-        let distance = filters["distance"]![0] as! [String]
-        let deals = filters["deals"] as? [String]
-        Business.searchWithTerm("Restaurants", sort: YelpSortMode(rawValue: Int(sort)!), categories: categories, deals: false) { (businesses:[Business]!, error: NSError!) in
+        let sort = filters["sort"] as! Int
+//        let distance = filters["distance"]![0] as! [String]
+        let deals = filters["deals"] as? Bool
+        Business.searchWithTerm(searchTerm, sort: YelpSortMode(rawValue: sort), categories: categories, deals: deals) { (businesses:[Business]!, error: NSError!) in
             self.businesses = businesses
             self.tableView.reloadData()
         }
