@@ -217,6 +217,7 @@ class FiltersViewController: UIViewController , UITableViewDelegate, UITableView
                 cell.selected = true
                 cell.radioImage.highlighted = true
             } else {
+                cell.selected = false
                 cell.radioImage.highlighted = false
             }
             return cell
@@ -234,6 +235,7 @@ class FiltersViewController: UIViewController , UITableViewDelegate, UITableView
     
     //Sort Switch changes
     func radioCell(radioCell: RadioCell, didChangeValue value: Bool) {
+//        print("\(radioCell.selected)")
         let indexPath = tableView.indexPathForCell(radioCell)!
         print("\(indexPath.section)")
         if indexPath.section == 2 {

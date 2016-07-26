@@ -26,7 +26,7 @@ class RadioCell: UITableViewCell {
 
     override func setSelected(selected: Bool, animated: Bool) {
         super.setSelected(selected, animated: animated)
-
+        print("Selected in Radio Cell: \(selected)")
         // Configure the view for the selected state
         radioImage.highlighted = selected
         delegate?.radioCell?(self, didChangeValue: selected)
