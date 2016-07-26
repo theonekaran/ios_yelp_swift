@@ -185,6 +185,36 @@
                                             <outlet property="switchLabel" destination="RsR-fV-Uk3" id="rNR-Xr-ABE"/>
                                         </connections>
                                     </tableViewCell>
+                                    <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" selectionStyle="default" indentationWidth="10" reuseIdentifier="RadioCell" rowHeight="44" id="SpF-NE-Gu1" customClass="RadioCell" customModule="Yelp" customModuleProvider="target">
+                                        <rect key="frame" x="0.0" y="136" width="414" height="44"/>
+                                        <autoresizingMask key="autoresizingMask"/>
+                                        <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="SpF-NE-Gu1" id="eaL-zC-Vco">
+                                            <rect key="frame" x="0.0" y="0.0" width="414" height="43.5"/>
+                                            <autoresizingMask key="autoresizingMask"/>
+                                            <subviews>
+                                                <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Label" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="UVX-qU-yWy">
+                                                    <rect key="frame" x="8" y="11" width="42" height="23"/>
+                                                    <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                                    <color key="textColor" cocoaTouchSystemColor="darkTextColor"/>
+                                                    <nil key="highlightedColor"/>
+                                                </label>
+                                                <imageView opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" image="Ok-50" highlightedImage="Ok Filled-50" translatesAutoresizingMaskIntoConstraints="NO" id="xoX-QW-8LI">
+                                                    <rect key="frame" x="381" y="10" width="25" height="25"/>
+                                                </imageView>
+                                            </subviews>
+                                            <constraints>
+                                                <constraint firstAttribute="trailing" secondItem="xoX-QW-8LI" secondAttribute="trailing" constant="8" id="80B-x2-Q8i"/>
+                                                <constraint firstItem="xoX-QW-8LI" firstAttribute="top" secondItem="eaL-zC-Vco" secondAttribute="top" constant="10" id="S8g-s7-jcO"/>
+                                                <constraint firstItem="xoX-QW-8LI" firstAttribute="centerY" secondItem="UVX-qU-yWy" secondAttribute="centerY" id="UpV-z4-hlA"/>
+                                                <constraint firstItem="UVX-qU-yWy" firstAttribute="top" secondItem="eaL-zC-Vco" secondAttribute="top" constant="11" id="tZ8-Gq-FfA"/>
+                                                <constraint firstItem="UVX-qU-yWy" firstAttribute="leading" secondItem="eaL-zC-Vco" secondAttribute="leading" constant="8" id="uWK-VH-OjK"/>
+                                            </constraints>
+                                        </tableViewCellContentView>
+                                        <connections>
+                                            <outlet property="radioImage" destination="xoX-QW-8LI" id="jKW-Vz-39v"/>
+                                            <outlet property="radioLabel" destination="UVX-qU-yWy" id="CXK-7a-EFb"/>
+                                        </connections>
+                                    </tableViewCell>
                                 </prototypes>
                             </tableView>
                         </subviews>
@@ -256,4 +286,8 @@
             <point key="canvasLocation" x="2041" y="338"/>
         </scene>
     </scenes>
+    <resources>
+        <image name="Ok Filled-50" width="25" height="25"/>
+        <image name="Ok-50" width="25" height="25"/>
+    </resources>
 </document>

@@ -24,7 +24,7 @@ import UIKit
 
 
 
-class FiltersViewController: UIViewController , UITableViewDelegate, UITableViewDataSource, SwitchCellDelegate {
+class FiltersViewController: UIViewController , UITableViewDelegate, UITableViewDataSource, SwitchCellDelegate, RadioCellDelegate {
 
     @IBOutlet weak var tableView: UITableView!
     weak var delegate: FiltersViewControllerDelegate?
@@ -43,12 +43,19 @@ class FiltersViewController: UIViewController , UITableViewDelegate, UITableView
     var data = [[[String:String]]]()
     let dataHeaders = ["Deals", "Distance", "Sort By", "Category"]
 
+    var currentSortPreference: String! = "Best Match"
+    
+    var dealSection = 0
+    var distanceSection = 1
+    var sortSection = 2
+    var categorySection = 3
+    
 //    var currentSortPrefs: sortPreferences!
 //    let tableStructure: [sortRowIdentifier] = [.bestMatch, .distance, .highestRated]
 //    var prefValues: [sortRowIdentifier: Bool] = [:]
 //    
 //    // should be set by the class that instantiates this view controller
-//    var currentPrefs: sortPreferences! {
+//    var currentSortPrefs: sortPreferences! {
 //        didSet {
 //            prefValues[.bestMatch] = currentSortPrefs.bestMatch
 //            prefValues[.distance] = currentSortPrefs.distance
@@ -77,7 +84,7 @@ class FiltersViewController: UIViewController , UITableViewDelegate, UITableView
         
         //Setup sections
 
-        data = [deals!, sortOptions!, distance!,categories!]
+        data = [deals!, distance!, sortOptions!,categories!]
 //        currentSortPrefs = currentSortPrefs ?? sortPreferences()
         
         
@@ -115,7 +122,7 @@ class FiltersViewController: UIViewController , UITableViewDelegate, UITableView
         
         for (row,isSelected) in categorySwitchStates {
             if isSelected {
-                print("Sort Row: \(categories[row]["code"]!)")
+                print("Category Row: \(categories[row]["code"]!)")
                 selectedCategories.append(categories[row]["code"]!)
             }
         }
@@ -156,11 +163,14 @@ class FiltersViewController: UIViewController , UITableViewDelegate, UITableView
         
         if selectedCategories.count > 0 {
             filters["categories"] = selectedCategories
-        } else if selectedSort.count > 0 {
+        }
+        if selectedSort.count > 0 {
             filters["sort"] = selectedSort
-        } else if selectedDeals.count > 0 {
+        }
+        if selectedDeals.count > 0 {
             filters["deals"] = selectedDeals
-        } else if selectedDistance.count > 0 {
+        }
+        if selectedDistance.count > 0 {
             filters["distance"] = selectedDistance
         }
 
@@ -180,28 +190,63 @@ class FiltersViewController: UIViewController , UITableViewDelegate, UITableView
         return data[section].count
     }
     
+    
+    //Initiate the Table cells
     func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
         
-        let cell = tableView.dequeueReusableCellWithIdentifier("SwitchCell", forIndexPath: indexPath) as! SwitchCell
         
-//        let options = data[indexPath.section][1]
-//        print("This is options:\(options)")
-//        cell.switchLabel.text = options?[indexPath.row]["name"]
-        cell.switchLabel.text = data[indexPath.section][indexPath.row]["name"]
-        
-        cell.delegate = self
-        if indexPath.section == 0 {
+        if indexPath.section == dealSection { //Deals
+            let cell = tableView.dequeueReusableCellWithIdentifier("SwitchCell", forIndexPath: indexPath) as! SwitchCell
+            cell.switchLabel.text = data[indexPath.section][indexPath.row]["name"]
+            cell.delegate = self
             cell.onSwitch.on = dealsSwitchStates[indexPath.row] ?? false
-        } else if indexPath.section == 1 {
+            return cell
+        } else if indexPath.section == distanceSection { //Distance
+            let cell = tableView.dequeueReusableCellWithIdentifier("SwitchCell", forIndexPath: indexPath) as! SwitchCell
+            cell.switchLabel.text = data[indexPath.section][indexPath.row]["name"]
+            cell.delegate = self
             cell.onSwitch.on = distanceSwitchStates[indexPath.row] ?? false
-        } else if indexPath.section == 2 {
-            cell.onSwitch.on = sortSwitchStates[indexPath.row] ?? false
-        } else if indexPath.section == 3 {
+            return cell
+        } else if indexPath.section == sortSection { //Sort
+            let cell = tableView.dequeueReusableCellWithIdentifier("RadioCell", forIndexPath: indexPath) as! RadioCell
+            cell.radioLabel.text = data[indexPath.section][indexPath.row]["name"]
+            cell.delegate = self
+            let sortOption = sortOptions[indexPath.row]["name"]!
+            
+            if sortOption == currentSortPreference {
+                cell.selected = true
+                cell.radioImage.highlighted = true
+            } else {
+                cell.radioImage.highlighted = false
+            }
+            return cell
+        } else if indexPath.section == categorySection { //Category
+            let cell = tableView.dequeueReusableCellWithIdentifier("SwitchCell", forIndexPath: indexPath) as! SwitchCell
+            cell.switchLabel.text = data[indexPath.section][indexPath.row]["name"]
+            cell.delegate = self
             cell.onSwitch.on = categorySwitchStates[indexPath.row] ?? false
+            return cell
+        } else {
+            let cell = UITableViewCell()
+            return cell
         }
-//        cell.onSwitch.on = switchStates[indexPath.section][indexPath.row] ?? false
-        
-        return cell
+    }
+    
+    //Sort Switch changes
+    func radioCell(radioCell: RadioCell, didChangeValue value: Bool) {
+        let indexPath = tableView.indexPathForCell(radioCell)!
+        print("\(indexPath.section)")
+        if indexPath.section == 2 {
+            let on = radioCell.selected
+            if on {
+                currentSortPreference = sortOptions[indexPath.row]["name"]
+                
+                tableView.reloadSections(NSIndexSet(index: indexPath.section), withRowAnimation: .None)
+                print(currentSortPreference)
+            }
+            sortSwitchStates[indexPath.row] = value
+            print("\(sortSwitchStates)")
+        }
     }
     
     func switchCell(switchCell: SwitchCell, didChangeValue value: Bool) {
@@ -212,13 +257,9 @@ class FiltersViewController: UIViewController , UITableViewDelegate, UITableView
             dealsSwitchStates[indexPath.row] = value
         } else if indexPath.section == 1 {
             distanceSwitchStates[indexPath.row] = value
-        } else if indexPath.section == 2 {
-            sortSwitchStates[indexPath.row] = value
-        } else if indexPath.section == 3 {
+        } else  if indexPath.section == 3 {
             categorySwitchStates[indexPath.row] = value
         }
-//        switchStates![indexPath.section] = [indexPath.row:value]
-//        print("\(switchStates)")
     }
     
     func yelpDeals () -> [[String: String]] {
