@@ -7,16 +7,22 @@
 //
 
 import UIKit
+import MapKit
+import CoreLocation
 
 class BusinessesViewController: UIViewController , UITableViewDataSource, UITableViewDelegate, FiltersViewControllerDelegate, UISearchBarDelegate {
 
     var businesses: [Business]!
     
+    @IBOutlet weak var mapView: MKMapView!
     @IBOutlet weak var tableView: UITableView!
     var searchTerm = "Thai"
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        mapView.hidden = true
+        let centerLocation = CLLocation(latitude: 37.7858, longitude: -122.406)
+        goToLocation(centerLocation)
         
         //Initialize tableview
         tableView.delegate = self
@@ -37,10 +43,13 @@ class BusinessesViewController: UIViewController , UITableViewDataSource, UITabl
             //reload tableview once data is available
             self.tableView.reloadData()
             
-//            for business in businesses {
-//                print(business.name!)
-//                print(business.address!)
-//            }
+            //Clear Map
+            self.clearMap()
+            
+            for business in businesses {
+                let pinCoordinate: CLLocationCoordinate2D = CLLocationCoordinate2DMake(business.coordinates!["latitude"]! as! CLLocationDegrees, business.coordinates!["longitude"]! as! CLLocationDegrees)
+                self.addAnnotationAtCoordinate(business.name!, coordinate: pinCoordinate)
+            }
         })
 
 /* Example of Yelp search with more search options specified
@@ -55,6 +64,31 @@ class BusinessesViewController: UIViewController , UITableViewDataSource, UITabl
 */
     }
     
+    func clearMap () {
+        let allAnnotations = self.mapView.annotations
+        self.mapView.removeAnnotations(allAnnotations)
+    }
+    
+    func goToLocation(location: CLLocation) {
+        let span = MKCoordinateSpanMake(0.1, 0.1)
+        let region = MKCoordinateRegionMake(location.coordinate, span)
+        mapView.setRegion(region, animated: false)
+    }
+    
+    func addAnnotationAtCoordinate(name: String, coordinate: CLLocationCoordinate2D) {
+        let annotation = MKPointAnnotation()
+        annotation.coordinate = coordinate
+        annotation.title = name
+        mapView.addAnnotation(annotation)
+    }
+    
+    @IBAction func onMapButtonPressed(sender: AnyObject) {
+        if mapView.hidden {
+            mapView.hidden = false
+        } else if !mapView.hidden {
+            mapView.hidden = true
+        }
+    }
     
     //Search methods
     func searchBarTextDidBeginEditing(searchBar: UISearchBar) {
@@ -75,11 +109,12 @@ class BusinessesViewController: UIViewController , UITableViewDataSource, UITabl
             
             //reload tableview once data is available
             self.tableView.reloadData()
+            self.clearMap()
+            for business in businesses {
+                let pinCoordinate: CLLocationCoordinate2D = CLLocationCoordinate2DMake(business.coordinates!["latitude"]! as! CLLocationDegrees, business.coordinates!["longitude"]! as! CLLocationDegrees)
+                self.addAnnotationAtCoordinate(business.name!, coordinate: pinCoordinate)
+            }
             
-            //            for business in businesses {
-            //                print(business.name!)
-            //                print(business.address!)
-            //            }
         })
         searchBar.showsCancelButton = false
         searchBar.text = ""
@@ -132,6 +167,11 @@ class BusinessesViewController: UIViewController , UITableViewDataSource, UITabl
         Business.searchWithTerm(searchTerm, sort: YelpSortMode(rawValue: sort), categories: categories, deals: deals) { (businesses:[Business]!, error: NSError!) in
             self.businesses = businesses
             self.tableView.reloadData()
+            self.clearMap()
+            for business in businesses {
+                let pinCoordinate: CLLocationCoordinate2D = CLLocationCoordinate2DMake(business.coordinates!["latitude"]! as! CLLocationDegrees, business.coordinates!["longitude"]! as! CLLocationDegrees)
+                self.addAnnotationAtCoordinate(business.name!, coordinate: pinCoordinate)
+            }
         }
     }
 
